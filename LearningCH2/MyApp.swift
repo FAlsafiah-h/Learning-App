@@ -1,9 +1,10 @@
 import SwiftUI
 
-@main struct MyApp: App {
-    var body: some Scene {
-        WindowGroup {
-			OnboardingView()
-        }
-    }
+@main
+struct LearningApp: App {
+	var body: some Scene {
+		WindowGroup {
+			RootView() 
+		}
+	}
 }

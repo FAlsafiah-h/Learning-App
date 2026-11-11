@@ -1,21 +1,9 @@
 import SwiftUI
 import Combine
 
-// MARK: - ViewModel
-class OnboardingViewModel: ObservableObject {
-	@Published var learningTopic: String = ""
-	@Published var selectedTimeframe: String = "Week"
-	
-	let timeframes = ["Week", "Month", "Year"]
-	
-	func startLearning() {
-		print("Starting learning: \(learningTopic) in a \(selectedTimeframe)")
-	}
-}
-
 // MARK: - View
 struct OnboardingView: View {
-	@StateObject private var viewModel = OnboardingViewModel()
+	@ObservedObject var viewModel: OnboardingViewModel
 	@Environment(\.colorScheme) var colorScheme
 
 	var body: some View {
@@ -119,13 +107,25 @@ struct OnboardingView: View {
 	}
 }
 
-// MARK: - Previews
-#Preview("Dark Mode") {
-	OnboardingView()
+
+struct RootView: View {
+	@StateObject private var onboardingVM = OnboardingViewModel()
+	
+	var body: some View {
+		if onboardingVM.isStarted {
+			ActivityDashboardView(viewModel: ActivityViewModel(learningTopic: onboardingVM.learningTopic))
+		} else {
+			OnboardingView(viewModel: onboardingVM)
+		}
+	}
+}
+
+#Preview("Dark") {
+	RootView()
 		.preferredColorScheme(.dark)
 }
 
-#Preview("Light Mode") {
-	OnboardingView()
+#Preview("Light") {
+	RootView()
 		.preferredColorScheme(.light)
 }

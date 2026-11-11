@@ -1,75 +1,9 @@
 import SwiftUI
 import Combine
 
-// MARK: - Models
-enum ActivityStatus {
-	case empty
-	case learned
-	case freezed
-}
-
-struct DayActivity: Identifiable {
-	let id: Int
-	let dayName: String
-	let dateNumber: Int
-	var status: ActivityStatus
-}
-
-// MARK: - ViewModel
-class ActivityViewModel: ObservableObject {
-	@Published var weekDays: [DayActivity] = [
-		DayActivity(id: 0, dayName: "S", dateNumber: 20, status: .learned),
-		DayActivity(id: 1, dayName: "M", dateNumber: 21, status: .learned),
-		DayActivity(id: 2, dayName: "T", dateNumber: 22, status: .learned),
-		DayActivity(id: 3, dayName: "W", dateNumber: 23, status: .empty),
-		DayActivity(id: 4, dayName: "T", dateNumber: 24, status: .empty),
-		DayActivity(id: 5, dayName: "F", dateNumber: 25, status: .empty),
-		DayActivity(id: 6, dayName: "S", dateNumber: 26, status: .empty)
-	]
-	
-	@Published var selectedDayId: Int = 4
-	@Published var freezesUsed: Int = 0
-	let maxFreezes: Int = 2
-
-	var learnedDaysCount: Int {
-		weekDays.filter { $0.status == .learned }.count
-	}
-	
-	var freezedDaysCount: Int {
-		weekDays.filter { $0.status == .freezed }.count
-	}
-	
-	var selectedDay: DayActivity {
-		weekDays.first(where: { $0.id == selectedDayId }) ?? weekDays[4]
-	}
-	
-	func selectDay(id: Int) {
-		selectedDayId = id
-	}
-	
-	func toggleLogStatus() {
-		if let index = weekDays.firstIndex(where: { $0.id == selectedDayId }) {
-			if weekDays[index].status == .learned {
-				weekDays[index].status = .empty
-			} else if weekDays[index].status == .empty {
-				weekDays[index].status = .learned
-			}
-		}
-	}
-	
-	func freezeDay() {
-		if let index = weekDays.firstIndex(where: { $0.id == selectedDayId }) {
-			if weekDays[index].status == .empty && freezesUsed < maxFreezes {
-				weekDays[index].status = .freezed
-				freezesUsed += 1
-			}
-		}
-	}
-}
-
 // MARK: - View
 struct ActivityDashboardView: View {
-	@StateObject private var viewModel = ActivityViewModel()
+	@ObservedObject var viewModel: ActivityViewModel
 	@Environment(\.colorScheme) var colorScheme
 	
 	var body: some View {
@@ -79,9 +13,9 @@ struct ActivityDashboardView: View {
 			
 			VStack(alignment: .leading, spacing: 20) {
 				
-				// Top Navigation Bar
+				// Top Navigation Bar (Displays custom skill topic)
 				HStack {
-					Text("Activity")
+					Text(viewModel.learningTopic)
 						.font(.system(size: 32, weight: .bold))
 						.foregroundColor(colorScheme == .dark ? .white : .black)
 					
@@ -187,12 +121,12 @@ struct ActivityDashboardView: View {
 									.frame(width: 210, height: 210)
 									.shadow(color: viewModel.selectedDay.status == .empty ? Color.orange.opacity(0.3) : Color.clear, radius: 10, x: 0, y: 5)
 								
-								Text(mainButtonText)
+								Text(viewModel.mainButtonText)
 									.font(.system(size: 18, weight: .bold))
 									.foregroundColor(.white)
 							}
 						}
-						.disabled(viewModel.selectedDay.status == .freezed)
+						.disabled(viewModel.isMainButtonDisabled)
 						Spacer()
 					}
 					Spacer()
@@ -203,7 +137,7 @@ struct ActivityDashboardView: View {
 					Button(action: {
 						viewModel.freezeDay()
 					}) {
-						Text(freezeButtonText)
+						Text(viewModel.freezeButtonText)
 							.font(.system(size: 15, weight: .semibold))
 							.foregroundColor(freezeButtonTextColor)
 							.frame(maxWidth: .infinity)
@@ -211,7 +145,7 @@ struct ActivityDashboardView: View {
 							.background(freezeButtonBackground)
 							.cornerRadius(28)
 					}
-					.disabled(viewModel.freezesUsed >= viewModel.maxFreezes || viewModel.selectedDay.status != .empty)
+					.disabled(viewModel.isFreezeButtonDisabled)
 					
 					Text("\(viewModel.freezesUsed) out of \(viewModel.maxFreezes) Freezes used")
 						.font(.system(size: 12))
@@ -223,7 +157,7 @@ struct ActivityDashboardView: View {
 		}
 	}
 	
-	// MARK: - View Helper Functions & Computed Properties
+	// MARK: - View Helper Functions & Computed Presentation Properties
 	
 	func dayColor(for day: DayActivity) -> Color {
 		if day.id == viewModel.selectedDayId {
@@ -248,35 +182,10 @@ struct ActivityDashboardView: View {
 	
 	var mainButtonBackground: Color {
 		switch viewModel.selectedDay.status {
-		case .learned:
-			return Color(red: 0.15, green: 0.15, blue: 0.15)
-		case .freezed:
+		case .learned, .freezed:
 			return Color(red: 0.15, green: 0.15, blue: 0.15)
 		case .empty:
 			return Color.orange
-		}
-	}
-	
-	var mainButtonText: String {
-		switch viewModel.selectedDay.status {
-		case .learned:
-			return "Logged as Learned"
-		case .freezed:
-			return "Day Freezed"
-		case .empty:
-			return "Log as Learned"
-		}
-	}
-	
-	var freezeButtonText: String {
-		if viewModel.selectedDay.status == .learned {
-			return "Day logged as learned"
-		} else if viewModel.selectedDay.status == .freezed {
-			return "Freezed for a day"
-		} else if viewModel.freezesUsed >= viewModel.maxFreezes {
-			return "Out of freezes"
-		} else {
-			return "Freeze for a day"
 		}
 	}
 	
@@ -299,11 +208,11 @@ struct ActivityDashboardView: View {
 
 // MARK: - Previews
 #Preview("Dark Mode") {
-	ActivityDashboardView()
+	ActivityDashboardView(viewModel: ActivityViewModel(learningTopic: "Swift"))
 		.preferredColorScheme(.dark)
 }
 
 #Preview("Light Mode") {
-	ActivityDashboardView()
+	ActivityDashboardView(viewModel: ActivityViewModel(learningTopic: "Swift"))
 		.preferredColorScheme(.light)
 }
