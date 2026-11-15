@@ -92,9 +92,10 @@ struct OnboardingView: View {
 							.foregroundColor(.white)
 							.frame(maxWidth: .infinity)
 							.padding(.vertical, 16)
-							.background(Color.orange)
+							.background(viewModel.learningTopic.trimmingCharacters(in: .whitespaces).isEmpty ? Color.orange.opacity(0.5) : Color.orange)
 							.cornerRadius(28)
 					}
+					.disabled(viewModel.learningTopic.trimmingCharacters(in: .whitespaces).isEmpty)
 					
 					Text("You can edit your desire later")
 						.font(.system(size: 12))
@@ -107,7 +108,7 @@ struct OnboardingView: View {
 	}
 }
 
-
+// MARK: - Root Container
 struct RootView: View {
 	@StateObject private var onboardingVM = OnboardingViewModel()
 	
@@ -120,6 +121,7 @@ struct RootView: View {
 	}
 }
 
+// MARK: - Previews
 #Preview("Dark") {
 	RootView()
 		.preferredColorScheme(.dark)

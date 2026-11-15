@@ -15,4 +15,3 @@ struct DayActivity: Identifiable {
 	let dateNumber: Int
 	var status: ActivityStatus
 }
-
