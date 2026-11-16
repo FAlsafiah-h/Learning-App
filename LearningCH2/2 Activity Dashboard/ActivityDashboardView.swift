@@ -1,5 +1,4 @@
 import SwiftUI
-import Combine
 
 struct ActivityDashboardView: View {
 	@ObservedObject var viewModel: ActivityViewModel
@@ -31,7 +30,7 @@ struct ActivityDashboardView: View {
 								.font(.system(size: 18))
 								.foregroundColor(colorScheme == .dark ? .white : .black)
 								.padding(10)
-								.background(colorScheme == .dark ? Color(red: 0.15, green: 0.15, blue: 0.15) : Color(.systemGray6))
+								.background(.ultraThinMaterial) // Glass Effect
 								.clipShape(Circle())
 						}
 						
@@ -40,7 +39,7 @@ struct ActivityDashboardView: View {
 								.font(.system(size: 18))
 								.foregroundColor(colorScheme == .dark ? .white : .black)
 								.padding(10)
-								.background(colorScheme == .dark ? Color(red: 0.15, green: 0.15, blue: 0.15) : Color(.systemGray6))
+								.background(.ultraThinMaterial) // Glass Effect
 								.clipShape(Circle())
 						}
 					}
@@ -82,7 +81,7 @@ struct ActivityDashboardView: View {
 					}
 				}
 				
-				// Metric Cards
+				// Metric Cards with Glass Effect
 				HStack(spacing: 14) {
 					VStack(spacing: 6) {
 						Image(systemName: "flame.fill")
@@ -97,7 +96,7 @@ struct ActivityDashboardView: View {
 					}
 					.frame(maxWidth: .infinity)
 					.padding(.vertical, 18)
-					.background(colorScheme == .dark ? Color(red: 0.12, green: 0.12, blue: 0.12) : Color(.systemGray6))
+					.background(.ultraThinMaterial) // Glass Effect
 					.cornerRadius(16)
 					
 					VStack(spacing: 6) {
@@ -113,7 +112,7 @@ struct ActivityDashboardView: View {
 					}
 					.frame(maxWidth: .infinity)
 					.padding(.vertical, 18)
-					.background(colorScheme == .dark ? Color(red: 0.12, green: 0.12, blue: 0.12) : Color(.systemGray6))
+					.background(.ultraThinMaterial) // Glass Effect
 					.cornerRadius(16)
 				}
 				
@@ -138,13 +137,18 @@ struct ActivityDashboardView: View {
 						} else {
 							VStack(spacing: 12) {
 								ZStack {
-									RoundedRectangle(cornerRadius: 14)
-										.fill(Color.white)
-										.frame(width: 52, height: 52)
-									Image(systemName: "xmark.seal.fill")
-										.font(.system(size: 40, weight: .bold))
-										.foregroundColor(.orange)
+									ForEach([0, 45], id: \.self) { angle in
+										RoundedRectangle(cornerRadius: 14)
+											.fill(Color.orange)
+											.frame(width: 52, height: 52)
+											.rotationEffect(.degrees(Double(angle)))
+									}
+									Image(systemName: "xmark")
+										.font(.system(size: 24, weight: .bold))
+										.foregroundColor(.white)
 								}
+								.frame(width: 52, height: 52)
+								
 								Text("You didn't reach your goal this time.")
 									.font(.system(size: 18, weight: .bold))
 									.foregroundColor(colorScheme == .dark ? .white : .black)
@@ -192,7 +196,7 @@ struct ActivityDashboardView: View {
 						Spacer()
 					}
 					
-					// Bottom Freeze Action Button & Counter
+					// Bottom Freeze Action Button & Counter with Glass Effect
 					VStack(spacing: 8) {
 						Button(action: { viewModel.freezeDay() }) {
 							Text(viewModel.freezeButtonText)
@@ -242,7 +246,6 @@ struct ActivityDashboardView: View {
 		}
 	}
 	
-	// MARK: - View Helpers
 	func dayTextColor(for day: DayActivity) -> Color {
 		if day.id == viewModel.selectedDayId { return .white }
 		switch day.status {
@@ -255,8 +258,8 @@ struct ActivityDashboardView: View {
 	func dayBackground(for day: DayActivity) -> Color {
 		if day.id == viewModel.selectedDayId { return .orange }
 		switch day.status {
-		case .learned: return Color.orange.opacity(0.25) // Low opacity orange circle
-		case .freezed: return Color.cyan.opacity(0.25)   // Low opacity blue circle
+		case .learned: return Color.orange.opacity(0.25)
+		case .freezed: return Color.cyan.opacity(0.25)
 		case .empty: return Color.clear
 		}
 	}
@@ -274,9 +277,16 @@ struct ActivityDashboardView: View {
 		} else { return .white }
 	}
 	
-	var freezeButtonBackground: Color {
+	var freezeButtonBackground: AnyView {
 		if viewModel.selectedDay.status == .freezed || viewModel.freezesUsed >= viewModel.maxFreezes || viewModel.selectedDay.status == .learned {
-			return colorScheme == .dark ? Color(red: 0.15, green: 0.15, blue: 0.15) : Color(.systemGray5)
-		} else { return Color.cyan }
+			return AnyView(colorScheme == .dark ? Color(red: 0.15, green: 0.15, blue: 0.15) : Color(.systemGray5))
+		} else {
+			return AnyView(
+				ZStack {
+					Color.cyan
+					Rectangle().fill(.ultraThinMaterial) // Glass Effect blended over cyan
+				}
+			)
+		}
 	}
 }

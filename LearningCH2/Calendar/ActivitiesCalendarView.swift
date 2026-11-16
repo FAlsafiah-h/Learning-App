@@ -12,14 +12,14 @@ struct ActivitiesCalendarView: View {
 			
 			VStack(alignment: .leading, spacing: 0) {
 				
-				// Top Navigation Bar
+				// Top Navigation Bar with Glass Effect
 				HStack {
 					Button(action: { dismiss() }) {
 						Image(systemName: "chevron.left")
 							.font(.system(size: 16, weight: .bold))
 							.foregroundColor(colorScheme == .dark ? .white : .black)
 							.padding(10)
-							.background(colorScheme == .dark ? Color(red: 0.15, green: 0.15, blue: 0.15) : Color(.systemGray6))
+							.background(.ultraThinMaterial) // Glass Effect
 							.clipShape(Circle())
 					}
 					

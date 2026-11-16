@@ -64,15 +64,15 @@ struct OnboardingView: View {
 							}) {
 								Text(timeframe)
 									.font(.system(size: 15, weight: .medium))
-									.foregroundColor(viewModel.selectedTimeframe == timeframe ? .white : (colorScheme == .dark ? .gray : .primary))
+									.foregroundColor(viewModel.selectedTimeframe == timeframe ? .white : (colorScheme == .dark ? .white : .primary))
 									.frame(maxWidth: .infinity)
 									.padding(.vertical, 14)
 									.background(
 										RoundedRectangle(cornerRadius: 20)
-											.fill(
-												viewModel.selectedTimeframe == timeframe
-												? Color.orange
-												: (colorScheme == .dark ? Color(red: 0.12, green: 0.12, blue: 0.12) : Color(.systemGray6))
+											.fill(viewModel.selectedTimeframe == timeframe ? Color.orange : Color.clear)
+											.background(
+												RoundedRectangle(cornerRadius: 20)
+													.fill(.ultraThinMaterial) // Glass Effect for unselected options
 											)
 									)
 							}
