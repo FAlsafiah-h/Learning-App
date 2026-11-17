@@ -19,6 +19,7 @@
         { "path": "<PRODUCTS>/LearningCH2.app", "id": "000000000000000000000120", "type": "wrapper.application", "index": false },
       ],
     },
+    { "path": "README.md", "target-membership": [ "LearningCH2/resources" ] },
   ],
   "targets": [
     {
