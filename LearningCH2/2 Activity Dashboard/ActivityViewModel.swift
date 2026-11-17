@@ -91,8 +91,9 @@ class ActivityViewModel: ObservableObject {
 	}
 
 	var isLearningPeriodOver: Bool {
-		return selectedDayId >= days.count - 1
-	}
+			guard let lastDay = days.last else { return false }
+			return lastDay.status != .empty
+		}
 
 	var learnedDaysCount: Int {
 		days.filter { $0.status == .learned }.count
